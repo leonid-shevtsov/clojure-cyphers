@@ -7,23 +7,23 @@
 ;; Because bitstrings are often reshuffled, they must be vectors, not lists
 
 (defn partition [n bitstring]
-  (map #(into [] %) (clojure.core/partition n bitstring))
+  (map #(vec %) (clojure.core/partition n bitstring))
   )
 
 (defn join [bitstrings]
-  (into [] (apply concat bitstrings))
+  (vec (apply concat bitstrings))
   )
 
 (defn xor [bitstring1 bitstring2]
-  (into [] (map bit-xor bitstring1 bitstring2))
+  (vec (map bit-xor bitstring1 bitstring2))
   )
 
 (defn lrotate [amount bitstring]
-  (into [] (apply concat (reverse (split-at amount bitstring))))
+  (vec (apply concat (reverse (split-at amount bitstring))))
   )
 
 (defn translate [function bitstring]
-  (into [] (map bitstring function))
+  (vec (map #(nth bitstring %) function))
   )
 
 (defn from-int [int-value width]
