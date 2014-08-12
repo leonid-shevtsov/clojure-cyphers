@@ -12,18 +12,12 @@
 
 (defn feistel
   [half-block K]
-  {:pre [(= 32 (count half-block)) (= 48 (count K))]
-   :post [(= 32 (count %))]
-   }
   (P (bitstring/join (map (fn [s-box str] (s-box str)) Si (bitstring/partition 6 (bitstring/xor K (E half-block))))))
   )
 
 
 (defn des-round
   [[left-half right-half] K]
-  {:pre [(= 32 (count left-half)) (= 32 (count left-half)) (= 48 (count K))]
-   :post [(= 32 (count (first %))) (= 32 (count (second %)))]
-   }
   (list right-half (bitstring/xor left-half (feistel right-half K)))
   )
 
