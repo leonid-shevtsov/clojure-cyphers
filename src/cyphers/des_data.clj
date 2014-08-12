@@ -123,4 +123,5 @@
 ; TODO fix S-box function to translate bitstrings representing numbers and back
 (def Si (map #(fn [bitstring] (bitstring/from-int (nth (translate-s-box %) (bitstring/to-int bitstring)) 4)) S-box-data))
 
-(def left-shifts-per-round [1 1 2 2 2 2 2 2 1 2 2 2 2 2 2 1])
+(def encryption-key-rotations [1 1 2 2 2 2 2 2 1 2 2 2 2 2 2 1])
+

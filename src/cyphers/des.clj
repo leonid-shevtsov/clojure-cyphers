@@ -31,27 +31,33 @@
   (let [
         input-key-halves (list ((:left PC-1) key) ((:right PC-1) key) )
         shift-halves (fn [halves amount] (map (partial bitstring/lrotate amount) halves))
-        shifted-halves-seq (rest (reductions shift-halves input-key-halves data/left-shifts-per-round))
+        shifted-halves-seq (rest (reductions shift-halves input-key-halves data/encryption-key-rotations))
         ]
     (map #(PC-2 (bitstring/join %)) shifted-halves-seq)
     )
   )
 
 (defn des-block
-  [key block]
+  [key-schedule block]
   (let [
-        Ki (KS key)
         input-halves (bitstring/partition 32 (IP block))
-        preoutput (reduce #(des-round %1 %2) input-halves Ki)
+        preoutput (reduce #(des-round %1 %2) input-halves key-schedule)
         ]
-    (-> preoutput bitstring/join FP)
+    (-> preoutput reverse bitstring/join FP)
     )
   )
 
-(defn des-encrypt
-  [key bytes]
-  (let [key-bitstring (bitstring/from-byte-array key)
-        blocks (partition 64 (bitstring/from-byte-array bytes))]
-    (bitstring/to-byte-array (bitstring/join (map (partial des-block key-bitstring) blocks)))
+(defn des-process-bytes
+  [key-schedule-mutator key bytes]
+  (let [
+        key-bitstring (bitstring/from-byte-array key)
+        key-schedule (key-schedule-mutator (KS key-bitstring))
+        blocks (partition 64 (bitstring/from-byte-array bytes))
+        ]
+    (bitstring/to-byte-array (bitstring/join (map (partial des-block key-schedule) blocks)))
     )
   )
+
+(def des-encrypt (partial des-process-bytes identity))
+
+(def des-decrypt (partial des-process-bytes reverse))

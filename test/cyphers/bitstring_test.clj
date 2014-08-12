@@ -35,29 +35,34 @@
 
 (deftest test-to-int
   (testing "converts bitstring into integer"
-    (is (= 11 (to-int [1 1 0 1]))) ; big-endian!
+    (is (= 11 (to-int [1 0 1 1]))) ; big-endian!
     )
   )
 
 (deftest test-from-int
   (testing "converts integer into bitstring"
-    (is (= [1 1 0 1 0] (from-int 11 5))) ; big-endian!
+    (is (= [0 1 0 1 1] (from-int 11 5))) ; big-endian!
     )
   (testing "negative integers (java char codes)"
-    (is (= [0 1 1 1 1 1 1 1] (from-int -2 8)))
+    (is (= [1 1 1 1 1 1 1 0] (from-int -2 8)))
     )
   )
 
 (deftest test-from-byte-array
   (testing "converts byte array"
-    (is (= [0 0 0 0 1 0 1 1 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 1 0 0 0 1 1 1 0 1]
+    (is (=  [1 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0 1 1 0 1 0 0 0 0 1 0 1 1 1 0 0 0]
            (from-byte-array (.getBytes "Ши" "UTF-8")))) ; too lazy for the rest of the string
+    )
+
+  (testing "reference js string"
+    (is (= [0 1 0 0 1 0 0 0  0 1 1 0 0 1 0 1  0 1 1 0 1 1 0 0  0 1 1 0 1 1 0 0  0 1 1 0 1 1 1 1  0 0 1 0 0 0 0 0  0 1 0 1 0 1 1 1  0 1 1 0 1 1 1 1]
+           (from-byte-array (.getBytes "Hello Wo" "UTF-8"))))
     )
   )
 
 (deftest test-to-byte-array
   (testing "converts to byte array"
     (is (= "Ши"
-           (String. (to-byte-array [0 0 0 0 1 0 1 1 0 0 0 1 0 1 0 1 0 0 0 0 1 0 1 1 0 0 0 1 1 1 0 1]) "UTF-8")))
+           (String. (to-byte-array  [1 1 0 1 0 0 0 0 1 0 1 0 1 0 0 0 1 1 0 1 0 0 0 0 1 0 1 1 1 0 0 0]) "UTF-8")))
     )
   )

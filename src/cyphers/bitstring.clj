@@ -27,7 +27,7 @@
   )
 
 (defn from-int [int-value width]
-  (reverse (loop [
+  (loop [
          value int-value
          result []
          ]
@@ -35,11 +35,11 @@
       result
       (recur (bit-shift-right value 1) (cons (byte (bit-and value 1)) result))
       )
-    ))
+    )
   )
 
 (defn to-int [bitstring]
-  (reduce #(bit-or (bit-shift-left %1 1) %2) (reverse bitstring))
+  (reduce #(bit-or (bit-shift-left %1 1) %2) bitstring)
   )
 
 (defn from-byte-array [byte-array]
