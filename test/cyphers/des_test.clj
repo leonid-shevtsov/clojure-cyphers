@@ -15,9 +15,7 @@
   (map bitstring/clamp-byte [0xf1 0x8e 0x33 0xd4 0x53 0x67 0x91 0xae]))
 
 (deftest test-des-encrypt
-  (is (= encrypted (into [] (des-encrypt des-key msg))))
-  )
+  (is (= encrypted (into [] (des-encrypt des-key msg)))))
 
 (deftest test-des-decrypt
-  (is (= msg (into [] (des-decrypt des-key encrypted))))
-  )
+  (is (= msg (into [] (des-decrypt des-key encrypted)))))

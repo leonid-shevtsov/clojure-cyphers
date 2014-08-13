@@ -5,38 +5,36 @@
     [cyphers.bitstring :as bitstring])
   )
 
-;; Reference
+;;; References
 ;; http://csrc.nist.gov/publications/fips/fips46-3/fips46-3.pdf
 ;; https://en.wikipedia.org/wiki/Data_Encryption_Standard
 ;; https://en.wikipedia.org/wiki/DES_supplementary_material
 
-(defn feistel
-  "The feistel function. Takes a 32-bit half-block and a 48-bit key, and
-  returns a 32-bit result"
-  [half-block K]
-  (P (bitstring/join (map (fn [s-box str] (s-box str))
-                          Si
-                          (bitstring/partition 6 (bitstring/xor K (E half-block)))))))
 
+(declare feistel KS des-round des-block des-process-bytes)
 
-(defn des-round
-  "One round of DES transformations.
-  Takes 2 32-bit half-blocks, and a 48-bit key"
-  [[left-half right-half] K]
-  (list right-half (bitstring/xor left-half (feistel right-half K))))
+(defn des-encrypt
+  "Encrypt a given byte[] string with a given key (also a byte[])"
+  [key bytes] (des-process-bytes identity key bytes))
 
-(defn KS
-  "Generate a key schedule from a given key,
-  using the forward (encryption) sequence of rotations"
-  [key]
+(defn des-decrypt
+  "Decrypt a given byte[] string with a given key (also a byte[])"
+  [key bytes] (des-process-bytes reverse key bytes))
+
+(defn- des-process-bytes
+  "DES algorithm that operates on a byte string"
+  [key-schedule-mutator key bytes]
   (let [
-        shift-halves (fn [halves amount] (map (partial bitstring/lrotate amount) halves))
-        input-key-halves (PC-1 key)
-        shifted-halves-schedule (rest (reductions shift-halves input-key-halves data/encryption-key-rotations))
+        key-bitstring (bitstring/from-byte-array key)
+        key-schedule (key-schedule-mutator (KS key-bitstring))
+        blocks (partition 64 (bitstring/from-byte-array bytes))
+        encrypted-blocks (map (partial des-block key-schedule) blocks)
         ]
-    (map (comp PC-2 bitstring/join) shifted-halves-schedule)))
+    (-> encrypted-blocks bitstring/join bitstring/to-byte-array)))
 
-(defn des-block
+(defn- des-block
+  "Entire DES algorithm operating on a single block, with a given key schedule
+  Key schedule is an array of 16 48-bit keys"
   [key-schedule block]
   (let [
         input-halves (bitstring/partition 32 (IP block))
@@ -44,15 +42,30 @@
         ]
     (-> preoutput reverse bitstring/join FP)))
 
-(defn des-process-bytes
-  [key-schedule-mutator key bytes]
+(defn- des-round
+  "One round of DES transformations.
+  Takes 2 32-bit half-blocks, and a 48-bit key"
+  [[left-half right-half] K]
+  (list right-half (bitstring/xor left-half (feistel right-half K))))
+
+(defn- feistel
+  "The feistel function. Takes a 32-bit half-block and a 48-bit key, and
+  returns a 32-bit result"
+  [half-block K]
+  (P (bitstring/join (map (fn [s-box str] (s-box str))
+                          Si
+                          (bitstring/partition 6 (bitstring/xor K (E half-block)))))))
+
+(defn- KS
+  "Generate a key schedule from a given key,
+  using the forward (encryption) sequence of rotations"
+  [key]
   (let [
-        key-bitstring (bitstring/from-byte-array key)
-        key-schedule (key-schedule-mutator (KS key-bitstring))
-        blocks (partition 64 (bitstring/from-byte-array bytes))
+        shift-halves (fn [halves amount]
+                       (map (partial bitstring/lrotate amount) halves))
+        input-key-halves (PC-1 key)
+        shifted-halves-schedule (rest (reductions shift-halves
+                                                  input-key-halves
+                                                  data/encryption-key-rotations))
         ]
-    (bitstring/to-byte-array (bitstring/join (map (partial des-block key-schedule) blocks)))))
-
-(def des-encrypt (partial des-process-bytes identity))
-
-(def des-decrypt (partial des-process-bytes reverse))
+    (map (comp PC-2 bitstring/join) shifted-halves-schedule)))
