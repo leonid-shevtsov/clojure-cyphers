@@ -7,7 +7,7 @@
 ;; Because bitstrings are often reshuffled, they must be vectors, not lists
 
 (defn partition [n bitstring]
-  (map #(vec %) (clojure.core/partition n bitstring))
+  (map vec (clojure.core/partition n bitstring))
   )
 
 (defn join [bitstrings]

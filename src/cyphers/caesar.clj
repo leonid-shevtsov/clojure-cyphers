@@ -16,15 +16,10 @@
 
 (defn encode-char
   [key-amount the-char]
-  (let [the-char-code (int the-char)]
-    (if (and (>= the-char-code (int \A)) (<= the-char-code (int \Z)))
-      (char-add-mod \A the-char key-amount)
-      (if (and (>= the-char-code (int \a)) (<= the-char-code (int \z)))
-        (char-add-mod \a the-char key-amount)
-        the-char
+  (cond (Character/isUpperCase the-char) (char-add-mod \A the-char key-amount)
+        (Character/isLowerCase the-char) (char-add-mod \a the-char key-amount)
+        :else                            the-char
         )
-      )
-    )
   )
 
 (defn encode
