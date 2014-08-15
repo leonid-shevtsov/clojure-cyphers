@@ -11,7 +11,10 @@
 
 (def max-key-prime 200)
 
-(defn extended-euclidean [a b]
+(defn extended-euclidean
+  "Extended euclidean algorithm.
+  Find gcd, x, y, such that GCD(a,b) = gcd = ax + by"
+  [a b]
   (loop [r0 a
          r1 b
          q 0
@@ -30,14 +33,18 @@
                t1
                (- t0 (* q t1)))))))
 
-(defn modular-multiplicative-inverse [e phi-n]
+(defn modular-multiplicative-inverse
+  "Find d such that (d*e) mod phi-n = 1"
+  [e phi-n]
   (let [mmi (:x (extended-euclidean e phi-n))]
     (if (< mmi 0)
       (+ mmi phi-n)
       mmi)))
 
 
-(defn expmod [base exponent modulus]
+(defn expmod
+  "Find (base^exponent) mod modulus"
+  [base exponent modulus]
   (reduce (fn [val _] (mod (* val base) modulus)) 1 (range 0 exponent)))
 
 (defn random-keygen [] ; not a pure function
@@ -55,9 +62,7 @@
 
 (defn encrypt [message-number public-key]
   {:pre [(<= 0 message-number) (< message-number (:n public-key))]}
-  (expmod message-number (:e public-key) (:n public-key))
-  )
+  (expmod message-number (:e public-key) (:n public-key)))
 
 (defn decrypt [encoded-number private-key]
-  (expmod encoded-number (:d private-key) (:n private-key))
-  )
+  (expmod encoded-number (:d private-key) (:n private-key)))
