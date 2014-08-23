@@ -1,7 +1,8 @@
 (ns cyphers.webapp
   (:use
     compojure.core
-    ring.middleware.params)
+    ring.middleware.params
+    ring.adapter.jetty)
   (:require [compojure.route :as route]
             [cyphers.webapp-views :as views]
             [clojure.data.codec.base64 :as b64]
@@ -53,3 +54,7 @@
   (route/not-found "<h1>Page not found</h1>"))
 
 (def app (wrap-params app-routes))
+
+(defn -main []
+  (let [port (Integer/parseInt (get (System/getenv) "PORT" "8080"))]
+    (run-jetty app {:port port})))
