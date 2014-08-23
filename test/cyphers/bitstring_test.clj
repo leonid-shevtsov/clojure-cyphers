@@ -5,7 +5,7 @@
 
 (deftest test-partition
   (testing "splits bitstring evenly"
-    (is (= '([0 1] [1 0]) (partition 2 [0 1 1 0])))))
+    (is (= '([0 1] [1 0]) (partition-bitstring 2 [0 1 1 0])))))
 
 (deftest test-join
   (testing "joins multiple bitstrings"

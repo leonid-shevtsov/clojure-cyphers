@@ -15,19 +15,22 @@
 
 (defn des-encrypt
   "Encrypt a given byte[] string with a given key (also a byte[])"
-  [key bytes] (des-process-bytes identity key bytes))
+  [key bytes]
+  (des-process-bytes identity key bytes))
 
 (defn des-decrypt
   "Decrypt a given byte[] string with a given key (also a byte[])"
-  [key bytes] (des-process-bytes reverse key bytes))
+  [key bytes]
+  (des-process-bytes reverse key bytes))
 
 (defn- des-process-bytes
   "DES algorithm that operates on a byte string"
   [key-schedule-mutator key bytes]
+  {:pre [(= (count key) 8) (= (mod (count bytes) 8) 0)]}
   (let [
         key-bitstring (bitstring/from-byte-array key)
         key-schedule (key-schedule-mutator (KS key-bitstring))
-        blocks (partition 64 (bitstring/from-byte-array bytes))
+        blocks (bitstring/partition-bitstring 64 (bitstring/from-byte-array bytes))
         encrypted-blocks (map (partial des-block key-schedule) blocks)
         ]
     (-> encrypted-blocks bitstring/join bitstring/to-byte-array)))
@@ -37,7 +40,7 @@
   Key schedule is an array of 16 48-bit keys"
   [key-schedule block]
   (let [
-        input-halves (bitstring/partition 32 (IP block))
+        input-halves (bitstring/partition-bitstring 32 (IP block))
         preoutput (reduce des-round input-halves key-schedule)
         ]
     (-> preoutput reverse bitstring/join FP)))
@@ -54,7 +57,7 @@
   [half-block K]
   (P (bitstring/join (map (fn [s-box str] (s-box str))
                           Si
-                          (bitstring/partition 6 (bitstring/xor K (E half-block)))))))
+                          (bitstring/partition-bitstring 6 (bitstring/xor K (E half-block)))))))
 
 (defn- KS
   "Generate a key schedule from a given key,

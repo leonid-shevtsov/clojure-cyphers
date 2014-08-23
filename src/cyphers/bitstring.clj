@@ -5,8 +5,9 @@
 
 ;; Because bitstrings are often reshuffled, they must be vectors, not lists
 
-(defn partition [n bitstring]
-  (map vec (clojure.core/partition n bitstring)))
+(defn partition-bitstring [n bitstring]
+  {:pre [(= 0 (mod (count bitstring) n))]}
+  (map vec (partition n bitstring)))
 
 (defn join [bitstrings]
   (vec (apply concat bitstrings)))
@@ -43,4 +44,4 @@
 
 (defn to-byte-array [bitstring]
   ; OPTIMIZE Terribly ineffective. But oh well
-  (into-array Byte/TYPE (map #(clamp-byte (to-int %)) (partition 8 bitstring))))
+  (into-array Byte/TYPE (map #(clamp-byte (to-int %)) (partition-bitstring 8 bitstring))))

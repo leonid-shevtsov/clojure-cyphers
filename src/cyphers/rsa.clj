@@ -1,5 +1,5 @@
 (ns cyphers.rsa
-  (require [cyphers.prime :as prime])
+  (:require [cyphers.prime :as prime])
   )
 
 ; Reference
@@ -45,7 +45,9 @@
 (defn expmod
   "Find (base^exponent) mod modulus"
   [base exponent modulus]
-  (reduce (fn [val _] (mod (* val base) modulus)) 1 (range 0 exponent)))
+  (reduce (fn [val _] (mod (* val base) modulus))
+          1
+          (range 0 exponent)))
 
 (defn random-keygen [] ; not a pure function
   (let [suitable-primes (take-while #(> max-key-prime %) primes)
