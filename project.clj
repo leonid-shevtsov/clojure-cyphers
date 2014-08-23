@@ -1,4 +1,5 @@
 (defproject cyphers "0.1.0-SNAPSHOT"
+  :min-lein-version "2.0.0"
   :description "Demo Implementations of cyphers in Clojure"
   :url "http://leonid.shevtsov.me"
   :dependencies [
